@@ -88,3 +88,6 @@ app.get('/converter', async (req, res) => {
 app.listen(port, () => {
     console.log(`Servidor rodando na porta ${port}`);
 });
+
+// git branch -M main
+// git push -u origin main

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<title>Conversor de Moedas</title>
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #3a3a3a;
+        position: relative;
+        overflow: hidden;
+    }
+
+    body ::before {
+        content: "$";
+        font-size: 10em;
+        color: #e0e0e0;
+        position: absolute;
+        top: 14%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.3;
+        z-index: -1;
+    }
+
+    #conversor {
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        background-color: white;
+        text-align: center;
+    }
+
+    form label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    form input,
+    form select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+
+    #resultado {
+        margin-top: 10px;
+    }
+</style>
+
+<head>
+    <title>Conversor de Moedas</title>
+    <style>
+        /* (Seu CSS aqui) */
+    </style>
+</head>
+
+<body>
+    <div id="conversor">
+        <h1>Conversor de Moedas</h1>
+        <form id="conversorForm">
+            <label for="valor">Valor</label>
+            <input type="number" id="valor" name="valor" required><br><br>
+
+            <label for="moedaOrigem">Moeda de Origem</label>
+            <select id="moedaOrigem" name="moedaOrigem" required>
+                <option value="USD">USD</option>
+                <option value="BRL">BRL</option>
+                <option value="GBP">GBP</option>
+                <option value="EUR">EUR</option>
+            </select><br><br>
+
+            <label for="moedaDestino">Moeda de Destino</label>
+            <select id="moedaDestino" name="moedaDestino" required>
+                <option value="BRL">BRL</option>
+                <option value="USD">USD</option>
+                <option value="GBP">GBP</option>
+                <option value="EUR">EUR</option>
+            </select><br><br>
+
+            <button type="submit">Converter</button>
+        </form>
+        <div id="resultado"></div>
+    </div>
+    <script>
+        const form = document.getElementById('conversorForm');
+        const resultadoDiv = document.getElementById('resultado');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+
+            try {
+                const url = `/converter?${params}`;
+                console.log("URL da requisição:", url);
+
+                const response = await fetch(url);
+                console.log("Resposta completa do fetch:", response);
+
+                if (!response.ok) {
+                    try {
+                        const errorData = await response.json();
+                        throw new Error(errorData.erro || `Erro na requisição: ${response.status}`);
+                    } catch (jsonError) {
+                        throw new Error(`Erro na requisição: ${response.status} - Erro ao parsear json de erro`);
+                    }
+                }
+
+                const data = await response.json();
+                resultadoDiv.textContent = `Resultado: $ ${data.resultado}`;
+            } catch (error) {
+                resultadoDiv.textContent = `Erro: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+
+</html>

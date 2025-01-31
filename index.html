@@ -4,68 +4,181 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conversor de Moedas</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Estilos gerais */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Container do conversor */
+        #conversor {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            color: #333;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Animação de entrada */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Título */
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Formulário */
+        form label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        form input, form select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        form input:focus, form select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+            outline: none;
+        }
+
+        /* Botão */
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Resultado */
+        #resultado {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Mensagens de erro */
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <div id="conversor">
         <h1>Conversor de Moedas</h1>
         <form id="conversorForm">
             <label for="valor">Valor</label>
-            <input type="number" id="valor" name="valor" required><br><br>
+            <input type="number" id="valor" name="valor" required placeholder="Ex: 100.00"><br><br>
 
             <label for="moedaOrigem">Moeda de Origem</label>
             <select id="moedaOrigem" name="moedaOrigem" required>
-                <option value="USD">USD</option>
-                <option value="BRL">BRL</option>
-                <option value="GBP">GBP</option>
-                <option value="EUR">EUR</option>
+                <option value="USD">USD - Dólar Americano</option>
+                <option value="BRL">BRL - Real Brasileiro</option>
+                <option value="GBP">GBP - Libra Esterlina</option>
+                <option value="EUR">EUR - Euro</option>
             </select><br><br>
 
             <label for="moedaDestino">Moeda de Destino</label>
             <select id="moedaDestino" name="moedaDestino" required>
-                <option value="BRL">BRL</option>
-                <option value="USD">USD</option>
-                <option value="GBP">GBP</option>
-                <option value="EUR">EUR</option>
+                <option value="BRL">BRL - Real Brasileiro</option>
+                <option value="USD">USD - Dólar Americano</option>
+                <option value="GBP">GBP - Libra Esterlina</option>
+                <option value="EUR">EUR - Euro</option>
             </select><br><br>
 
             <button type="submit">Converter</button>
         </form>
         <div id="resultado"></div>
+        <div class="error" id="error"></div>
     </div>
     <script>
         const form = document.getElementById('conversorForm');
         const resultadoDiv = document.getElementById('resultado');
+        const errorDiv = document.getElementById('error');
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
+            errorDiv.textContent = ''; // Limpa erros anteriores
+            resultadoDiv.textContent = ''; // Limpa resultados anteriores
 
             const formData = new FormData(form);
-            const params = new URLSearchParams(formData);
+            const valor = parseFloat(formData.get("valor"));
+            const from = formData.get("moedaOrigem");
+            const to = formData.get("moedaDestino");
+
+            // Validação do valor
+            if (valor <= 0 || isNaN(valor)) {
+                errorDiv.textContent = "Erro: Insira um valor maior que zero.";
+                return;
+            }
 
             try {
-                const url = `/converter?${params}`;
+                const url = `/converter?${new URLSearchParams(formData)}`;
                 console.log("URL da requisição:", url);
 
                 const response = await fetch(url);
                 console.log("Resposta completa do fetch:", response);
 
                 if (!response.ok) {
-                    try {
-                        const errorData = await response.json();
-                        throw new Error(errorData.erro || `Erro na requisição: ${response.status}`);
-                    } catch (jsonError) {
-                        throw new Error(`Erro na requisição: ${response.status} - Erro ao parsear json de erro`);
-                    }
+                    const errorData = await response.json();
+                    throw new Error(errorData.erro || `Erro na requisição: ${response.status}`);
                 }
 
                 const data = await response.json();
-                resultadoDiv.textContent = `Resultado: $ ${data.resultado}`;
+                resultadoDiv.textContent = `Resultado: ${to} ${data.resultado}`;
             } catch (error) {
-                resultadoDiv.textContent = `Erro: ${error.message}`;
+                errorDiv.textContent = `Erro: ${error.message}`;
             }
         });
     </script>
 </body>
-
 </html>

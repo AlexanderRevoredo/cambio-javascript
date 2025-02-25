@@ -89,5 +89,6 @@ app.listen(port, () => {
     console.log(`Servidor rodando na porta ${port}`);
 });
 
+// git add .
 // git branch -M main
 // git push -u origin main
